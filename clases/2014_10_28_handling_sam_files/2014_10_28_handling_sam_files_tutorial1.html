@@ -1,0 +1,525 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Estudios in silico en Biomedicina  Máster en Bioinformática, Universidad de Valencia" />
+  <title>NGS data analysis tutorial:  Handling SAM/BAM files</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style>
+  
+  html {
+      color:#000;
+      background:#FFF;
+  }
+  
+  body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td {
+      margin:0;
+      padding:0;
+  }
+  
+  table {
+      border-spacing:0;
+      font-size:inherit;
+      font:100%;
+      /*max-width:100%;*/
+      background-color:transparent;
+      border:1px solid #DDD;
+      border-left:0;
+      border-collapse:collapsed;
+      -webkit-border-radius:4px;
+      -moz-border-radius:4px;
+      border-radius:4px;
+  }
+  
+  fieldset,img {
+      border:0;
+  }
+  
+  address,caption,cite,code,dfn,em,strong,th,var {
+      font-style:normal;
+      font-weight:400;
+  }
+  
+  ol,ul {
+      list-style:none;
+  }
+  
+  caption,th {
+      text-align:left;
+  }
+  
+  h1,h2,h3,h4,h5,h6 {
+      font-size:100%;
+      font-weight:400;
+      color:#20639b;
+      margin:1em 0;
+  }
+  
+  q:before,q:after {
+      content:'';
+  }
+  
+  abbr,acronym {
+      border:0;
+      font-variant:normal;
+      border-bottom:1px dotted #000;
+      cursor:help;
+  }
+  
+  sup {
+      vertical-align:text-top;
+  }
+  
+  sub {
+      vertical-align:text-bottom;
+  }
+  
+  input,textarea,select {
+      font-family:inherit;
+      font-weight:inherit;
+      font-size:100%;
+  }
+  
+  legend {
+      color:#000;
+  }
+  
+  h1,h2,h3,h4,h5,h6,strong {
+      font-weight:700;
+  }
+  
+  em {
+      font-style:italic;
+  }
+  
+  blockquote,ul,ol,dl {
+      margin:1em;
+      font-style:italic;
+  }
+  
+  ol,ul,dl {
+      margin-left:2em;
+  }
+  
+  ol {
+      list-style:decimal outside;
+  }
+  
+  ul {
+      list-style:disc outside;
+  }
+  
+  dl dd {
+      margin-left:1em;
+  }
+  
+  th,td {
+      line-height:1.125em;
+      text-align:left;
+      vertical-align:top;
+      border-top:1px solid #DDD;
+      border-left:1px solid #DDD;
+      padding:.5em;
+  }
+  
+  th {
+      font-weight:700;
+      text-align:center;
+      color:#20639b;
+  }
+  
+  table thead:first-child tr:first-child th,table tbody:first-child tr:first-child th,table tbody:first-child tr:first-child td {
+      border-top:0;
+  }
+  
+  table thead:first-child tr:first-child th:first-child,table tbody:first-child tr:first-child td:first-child {
+      -webkit-border-radius:4px 0 0 0;
+      -moz-border-radius:4px 0 0;
+      border-radius:4px 0 0 0;
+  }
+  
+  table thead:first-child tr:first-child th:last-child,table tbody:first-child tr:first-child td:last-child {
+      -webkit-border-radius:0 4px 0 0;
+      -moz-border-radius:0 4px 0 0;
+      border-radius:0 4px 0 0;
+  }
+  
+  table thead:last-child tr:last-child th:first-child,table tbody:last-child tr:last-child td:first-child {
+      -webkit-border-radius:0 0 0 4px;
+      -moz-border-radius:0 0 0 4px;
+      border-radius:0 0 0 4px;
+  }
+  
+  table thead:last-child tr:last-child th:last-child,table tbody:last-child tr:last-child td:last-child {
+      -webkit-border-radius:0 0 4px 0;
+      -moz-border-radius:0 0 4px;
+      border-radius:0 0 4px 0;
+  }
+  
+  table tbody tr:nth-child(odd) td,table tbody tr:nth-child(odd) th {
+      background-color:#f9f9f9;
+  }
+  
+  caption {
+      margin-bottom:.5em;
+      text-align:center;
+  }
+  
+  p,fieldset,table,pre {
+      margin-top:.5em;
+      margin-bottom:.5em;
+  }
+  
+  body {
+      font:16px/1.4 "Helvetica Neue", Helvetica, "Open Sans", Arial, sans-serif;
+      color:#333;
+      /*max-width:960px;*/
+      /*margin:0 auto;*/
+      margin:1em;
+  }
+  
+  pre,code,kbd,samp,tt {
+      font-family:monospace;
+      font-size:90%;
+      line-height:100%;
+  }
+  
+  h1 {
+      font-size:200%;
+      border-bottom:2px dotted #ddd;
+  }
+  
+  a,a:visited,code {
+      /*color:#f06024;*/
+      color:#20639b;
+  }
+  
+  a:link {text-decoration:none;}    /* unvisited link */
+  a:visited {text-decoration:none;} /* visited link */
+  a:hover {text-decoration:underline;}   /* mouse over link */
+  a:active {text-decoration:underline;}  /* selected link */
+  
+  
+  h2 {
+      font-size:160%;
+  }
+  
+  h3 {
+      font-size:120%;
+  }
+  
+  h4 {
+      font-size:110%;
+  }
+  
+  h5 {
+      font-size:95%;
+  }
+  
+  h6 {
+      font-size:90%;
+      color:#999;
+  }
+  
+  dl {
+      margin:0 0 1.125em;
+  }
+  
+  dt {
+      font-weight:700;
+      line-height:1.125em;
+  }
+  
+  dd {
+      margin-left:1em;
+      line-height:1.125em;
+  }
+  
+  pre,blockquote {
+      border:1px solid #ddd;
+      background-color:#f1f1f1;
+      -webkit-border-radius:6px;
+      -moz-border-radius:6px;
+      border-radius:6px;
+      padding:10px;
+  }
+  
+  blockquote {
+      margin:1em 2.5em;
+  }
+  
+  code {
+      color:#20639b;
+      background:#f1f1f1;
+      line-height:1.5em;
+  }
+  
+  img {
+      max-width:100%;
+  }
+  
+  ol[type=1] {
+      list-style-type:decimal;
+  }
+  
+  ol[type=a] {
+      list-style-type:lower-alpha;
+  }
+  
+  ol[type=A] {
+      list-style-type:upper-alpha;
+  }
+  
+  ol[type=I] {
+      list-style-type:upper-roman;
+  }
+  
+  ol[type=i] {
+      list-style-type:lower-roman;
+  }
+  
+  
+  
+  h1.title {
+          font-size: 200%;
+          font-weight: bold;
+          padding-top: 0.2em;
+          /*padding-bottom: 0.2em;*/
+          text-align: center;
+          border: none;
+  }
+  
+  h2.author {
+          font-size: 100%;
+          text-align: center;
+          border: none;
+  }
+  
+  h3.date {
+          font-size: 75%;
+          text-align: center;
+          border: none;
+          font-style:italic;
+          font-weight: bold;
+  }
+  
+  /* animated spoiler CSS by Bloggersentral.com */
+  .spoilerbutton {
+  	display:block;
+  	margin:5px 0;
+  	padding: 3px 6px;
+  	color: #20639b;
+  	font-size: small;
+  	font-weight: bold;
+  }
+  .spoiler {overflow:hidden;background: #f5f5f5;}
+  .spoiler > div {-webkit-transition: all 0.2s ease;-moz-transition: margin 0.2s ease;-o-transition: all 0.2s ease;transition: margin 0.2s ease;}
+  .spoilerbutton[value="Show answer"] + .spoiler > div {margin-top:-100%;}
+  .spoilerbutton[value="Hide answer"] + .spoiler {padding:5px;} 
+  /**********************************************/
+  
+  </style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">NGS data analysis tutorial: <br> Handling SAM/BAM files</h1>
+<h2 class="author"><a href="http://www.uv.es/bioinfor/">Estudios in silico en Biomedicina</a> <br> <em>Máster en Bioinformática, Universidad de Valencia</em></h2>
+<h3 class="date"><a href="http://www.dmontaner.com">David Montaner</a> <br> <em>2014-10-28</em></h3>
+</div>
+<hr>
+<div id="TOC">
+<ul>
+<li><a href="#preliminaries">Preliminaries</a><ul>
+<li><a href="#software-used-in-this-practical">Software used in this practical:</a></li>
+<li><a href="#file-formats-explored-in-this-practical">File formats explored in this practical:</a></li>
+<li><a href="#data-used-in-this-practical">Data used in this practical:</a></li>
+</ul></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#exercise">Exercise</a><ul>
+<li><a href="#explore-the-sam-file">Explore the SAM file</a></li>
+<li><a href="#binary-bam-version-of-the-file">Binary (BAM) version of the file</a></li>
+<li><a href="#filtering-the-alignments-by-flag">Filtering the alignments by FLAG</a></li>
+<li><a href="#filtering-the-alignments-by-quality">Filtering the alignments by Quality</a></li>
+<li><a href="#uncompressed-binary-files">Uncompressed binary files</a></li>
+<li><a href="#sort-and-index"><em>Sort</em> and <em>Index</em></a></li>
+<li><a href="#visualization">Visualization</a></li>
+</ul></li>
+</ul>
+</div>
+<hr>
+<!-- Common URLs: Tools -->
+<!-- Common URLs: File Formats -->
+<!-- External URLs -->
+<h1 id="preliminaries">Preliminaries</h1>
+<h2 id="software-used-in-this-practical">Software used in this practical:</h2>
+<ul>
+<li><a href="http://samtools.sourceforge.net/" title="SAMtools old site">SAMtools</a> : Samtools is a suite of programs for interacting with high-throughput sequencing data; mostly with SAM/BAM. Find the manual page <a href="http://www.htslib.org/doc/samtools-1.1.html" title="SAMtools manual (version 1.1)">here</a>.</li>
+<li><a href="http://www.broadinstitute.org/igv/" title="Integrative Genomics Viewer home page">IGV</a> : Integrative Genomics Viewer</li>
+</ul>
+<h2 id="file-formats-explored-in-this-practical">File formats explored in this practical:</h2>
+<ul>
+<li><a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> : Sequence Alignment/Map format. A TAB-delimited text format storing the alignment information. A <em>header section</em> is optional.<br /> Mandatory fields are:
+<ol style="list-style-type: decimal">
+<li>QNAME: read name</li>
+<li>FLAG: bitwise FLAG</li>
+<li>RNAME: reference sequence name (chromosome)</li>
+<li>POS: 1-based leftmost mapping position (where the read starts mapping)</li>
+<li>MAPQ: mapping quality</li>
+<li>CIGAR: CIGAR string</li>
+<li>RNEXT: name of the mate/next read (for paired ends)</li>
+<li>PNEXT: Position of the mate/next read (BP O )</li>
+<li>TLEN: observed Template LENgth</li>
+<li>SEQ: read sequence</li>
+<li>QUAL: read quality (phred-scale +33)</li>
+</ol></li>
+<li>[BAM] : A <strong>binary</strong> version of the SAM file.</li>
+</ul>
+<h2 id="data-used-in-this-practical">Data used in this practical:</h2>
+<ul>
+<li><strong>s030_reads.sam</strong> the SAM file generated using <a href="http://bio-bwa.sourceforge.net/" title="Burrows-Wheeler Aligner">BWA</a> in the previous sessions.</li>
+</ul>
+<h1 id="overview">Overview</h1>
+<ol style="list-style-type: decimal">
+<li>Explore the SAM file using <a href="http://samtools.sourceforge.net/" title="SAMtools old site">SAMtools</a></li>
+<li>Sort alignments in chromosome order</li>
+<li>Index the file.</li>
+<li>Visualize the alignment using <a href="http://www.broadinstitute.org/igv/" title="Integrative Genomics Viewer home page">IGV</a></li>
+</ol>
+<h1 id="exercise">Exercise</h1>
+<p>Retrieve the <strong>s030_reads.sam</strong> file generated in the last practical.</p>
+<pre><code>cd data</code></pre>
+<!-- data_test directory to run my examples
+    cd .. 
+    rm -r data_test
+    mkdir data_test
+    cp s030_reads.sam
+-->
+<h2 id="explore-the-sam-file">Explore the SAM file</h2>
+<p>We can use <code>samtools view</code> to access some parts of the file.</p>
+<p>We can for instance get the header of the file doing</p>
+<pre><code>samtools view -SH s030_reads.sam</code></pre>
+<p>The alignment of the SAM file may be accessed doing</p>
+<pre><code>samtools view -S s030_reads.sam</code></pre>
+<p>Notice that this command does not include the <strong>header</strong> lines</p>
+<pre><code>samtools view -S s030_reads.sam | head </code></pre>
+<p>You can include those with the option <code>-h</code></p>
+<pre><code>samtools view -Sh s030_reads.sam | head </code></pre>
+<ul>
+<li>What does it mean the option <code>-S</code> used in all commands above?<br /> (find the documentation at <code>samtools view -?</code>)</li>
+<li>What happens if you do not include the <code>-S</code> option in the command?</li>
+</ul>
+<h2 id="binary-bam-version-of-the-file">Binary (BAM) version of the file</h2>
+<p>Generally we do not want to handle text files.</p>
+<p>We can convert SAM files to binary <strong>and compressed</strong> format BAM using <code>samtools view</code></p>
+<pre><code>samtools view -Sb -o s040_reads.bam s030_reads.sam</code></pre>
+<p>Check that the file has been compressed</p>
+<pre><code>ls -lh </code></pre>
+<p>and that is a binary file</p>
+<pre><code>head s040_reads.bam</code></pre>
+<p>You can specifically find the file formats using the shell function <code>file</code></p>
+<pre><code>file *</code></pre>
+<p>which will return the specification of each file.</p>
+<p> </p>
+<p>We can recover (or visualize) the information in the BAM file using <code>samtools view</code> again</p>
+<pre><code>samtools view s040_reads.bam</code></pre>
+<ul>
+<li>Does this file have the header lines? <code>samtools view s040_reads.bam | head</code></li>
+<li>Is it then a valid BAM file?</li>
+</ul>
+<p>Usually we may prefer to use BAM files which include the <strong>header</strong> lines so that no information is lost.</p>
+<p>We can go from the SAM file to BAM version keeping the header using the option <code>-h</code> already explored above</p>
+<pre><code>samtools view -Sbh -o s040_reads_and_head.bam s030_reads.sam</code></pre>
+<p>Check that the header is there now</p>
+<!-- 
+    samtools -h view s040_reads_and_head.bam | head
+
+or 
+
+    samtools view -H s040_reads_and_head.bam
+-->
+<h2 id="filtering-the-alignments-by-flag">Filtering the alignments by FLAG</h2>
+<p>We can use <code>samtools view</code> to filter the reads according to their FLAG.</p>
+<p>For exploratory purposes we could extract the FLAG column using <code>samtools</code> and the shell command <code>cut</code>. We know form the specification of the SAM/BAM file that the FLAG is in the <strong>second column</strong> or field of the file. Hence we can do</p>
+<pre><code>samtools view s040_reads_and_head.bam | cut -f 2</code></pre>
+<p>to get this second column or</p>
+<pre><code>samtools view s040_reads_and_head.bam | cut -f 2 | sort | uniq</code></pre>
+<p>to get the <strong>unique</strong> values of the FLAG.</p>
+<p>(Remember there are some tools to help you understand such flags: <a href="http://broadinstitute.github.io/picard/explain-flags.html" class="uri">http://broadinstitute.github.io/picard/explain-flags.html</a>)</p>
+<p>We can then read just the <em>unmapped</em> reads (flag 4) doing</p>
+<pre><code>samtools view -f 4 s040_reads_and_head.bam</code></pre>
+<p>or the reads mapped to the <em>reverse strand</em> (flag 16) doing</p>
+<pre><code>samtools view -f 16 s040_reads_and_head.bam</code></pre>
+<ul>
+<li>How would you use <code>wc</code> to confirm that the returned file is filtered? <!-- just count the number of lines with and without the -f option--><br /> You could also use the <code>-c</code> option of <code>samtools view</code> to count the number of lines… How does it work? <!-- samtools view -c -f 16 s040_reads_and_head.bam --></li>
+<li>Does the command above include the header in its output? <!--no --></li>
+<li>How would you do to include such header into the file? <!-- samtools view -h -f 16 s040_reads_and_head.bam --></li>
+<li>How does the <code>-F</code> work?</li>
+</ul>
+<!--
+Nice NOTE on ZERO flags form <https://www.biostars.org/p/7374/>
+
+When the __flag field is 0__,
+it means none of the bitwise flags specified in the SAM spec (on page 4) are set.
+That means that your reads with flag 0 are unpaired (because the first flag, 0x1, is not set),
+successfully mapped to the reference (because 0x4 is not set)
+and mapped to the forward strand (because 0x10 is not set).
+
+Summarizing your data,
+the reads with flag 4 are unmapped,
+the reads with flag 0 are mapped to the forward strand
+and the reads with flag 16 are mapped to the reverse strand.
+-->
+<h2 id="filtering-the-alignments-by-quality">Filtering the alignments by Quality</h2>
+<p>We can use <code>samtools view</code> to filter alignments according to their <strong>quality</strong>. The <code>-q</code> option lets you set up a <em>minimum</em> quality threshold for reads.</p>
+<p>Remember the Quality of the alignment is in the <strong>fifth column</strong> of the BAM file. You can use <code>cut</code> to extract just such column of the file</p>
+<pre><code>samtools view s040_reads.bam | cut -f 5
+samtools view s040_reads.bam | cut -f 5 | sort | uniq</code></pre>
+<p>Then we can keep just the good quality reads doing something like</p>
+<pre><code>samtools view -q 30 s040_reads.bam</code></pre>
+<p>And of course several filtering options may be applied at a time:</p>
+<pre><code>samtools view -f 16 -q 30 s040_reads.bam</code></pre>
+<h2 id="uncompressed-binary-files">Uncompressed binary files</h2>
+<p>What does the <code>-u</code> option does:</p>
+<pre><code>samtools view -Sb -o s040_reads.bam s030_reads.sam
+samtools view -Su -o s040_reads_u.bam s030_reads.sam</code></pre>
+<p>(Read the manual and compare the output of the two commands above)</p>
+<h2 id="sort-and-index"><em>Sort</em> and <em>Index</em></h2>
+<p>Generally after alignment, the rads in the SAM/BAM files have a random order.</p>
+<p>You can see that in our example data getting just the fourth column of the file</p>
+<pre><code>samtools view -F 4 s040_reads_and_head.bam | cut  -f 4</code></pre>
+<ul>
+<li>What does the <code>-F 4</code> option do? <!-- filters out the unmapped reads --></li>
+</ul>
+<p>The program <code>samtools sort</code> allow us sorting the alignments according to their chromosomal position</p>
+<pre><code>samtools sort s040_reads_and_head.bam s050_sorted</code></pre>
+<p>Check that the new BAM file is ordered</p>
+<pre><code>samtools view s050_sorted.bam | cut -f 4 </code></pre>
+<p>and that the header has been kept</p>
+<pre><code>samtools view -H s050_sorted.bam </code></pre>
+<p>Remember the <strong>unmapped</strong> reads had a <strong>0</strong> position in their fourth column.</p>
+<ul>
+<li>What does the <code>samtools sort</code> option does to them? <!-- they go to the end of the file--> You can use <code>cut</code> to extract several fields or columns of a matrix<br /> <code>samtools view s050_sorted.bam | cut -f 2,4 | head -n 20</code></li>
+</ul>
+<p> </p>
+<p>Sorting the reads is convenient for many purposes. One of the main ones is that a sorted file can be <strong>indexed</strong> so that access to it is sped up.</p>
+<p>SAMtools have their <strong>own indexing tool</strong> <code>samtools index</code>.</p>
+<p>Once our BAM file is sorted, we can index it doing</p>
+<pre><code>samtools index s050_sorted.bam</code></pre>
+<p>this will create the index file with the <code>-bai</code> extension.</p>
+<ul>
+<li>Can you index the unsorted file? <!-- NO --></li>
+<li>Can you sort SAM files? <!-- NO --></li>
+</ul>
+<p>Once we have a sorted and indexed BAM file, we can, for instance, <strong>access to some alignments by chromosomal position</strong></p>
+<pre><code>samtools view s050_sorted.bam 21:44547700-44547750</code></pre>
+<h2 id="visualization">Visualization</h2>
+<p>Some other tools (not just SAMtools) rely up on the sorted and indexed BAM files to work.</p>
+<p>It is the case of <a href="http://www.broadinstitute.org/igv/" title="Integrative Genomics Viewer home page">IGV</a> which can be used to visualize read alignment to the genome.</p>
+<p>Open IGV and load the <code>s050_sorted.bam</code>.</p>
+<p>Find the reads of the file and see how they are displayed.</p>
+<p>Remember in our example all reads are in <strong>chromosome 21</strong>.</p>
+<p>Find the <strong>base position</strong> of the read alignments and use the IGV <em>search</em> box to find them in the genome.</p>
+</body>
+</html>

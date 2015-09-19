@@ -1,0 +1,487 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Estudios in silico en Biomedicina  Máster en Bioinformática, Universidad de Valencia" />
+  <title>NGS data analysis tutorial:  Alignment</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style>
+  
+  html {
+      color:#000;
+      background:#FFF;
+  }
+  
+  body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td {
+      margin:0;
+      padding:0;
+  }
+  
+  table {
+      border-spacing:0;
+      font-size:inherit;
+      font:100%;
+      /*max-width:100%;*/
+      background-color:transparent;
+      border:1px solid #DDD;
+      border-left:0;
+      border-collapse:collapsed;
+      -webkit-border-radius:4px;
+      -moz-border-radius:4px;
+      border-radius:4px;
+  }
+  
+  fieldset,img {
+      border:0;
+  }
+  
+  address,caption,cite,code,dfn,em,strong,th,var {
+      font-style:normal;
+      font-weight:400;
+  }
+  
+  ol,ul {
+      list-style:none;
+  }
+  
+  caption,th {
+      text-align:left;
+  }
+  
+  h1,h2,h3,h4,h5,h6 {
+      font-size:100%;
+      font-weight:400;
+      color:#20639b;
+      margin:1em 0;
+  }
+  
+  q:before,q:after {
+      content:'';
+  }
+  
+  abbr,acronym {
+      border:0;
+      font-variant:normal;
+      border-bottom:1px dotted #000;
+      cursor:help;
+  }
+  
+  sup {
+      vertical-align:text-top;
+  }
+  
+  sub {
+      vertical-align:text-bottom;
+  }
+  
+  input,textarea,select {
+      font-family:inherit;
+      font-weight:inherit;
+      font-size:100%;
+  }
+  
+  legend {
+      color:#000;
+  }
+  
+  h1,h2,h3,h4,h5,h6,strong {
+      font-weight:700;
+  }
+  
+  em {
+      font-style:italic;
+  }
+  
+  blockquote,ul,ol,dl {
+      margin:1em;
+      font-style:italic;
+  }
+  
+  ol,ul,dl {
+      margin-left:2em;
+  }
+  
+  ol {
+      list-style:decimal outside;
+  }
+  
+  ul {
+      list-style:disc outside;
+  }
+  
+  dl dd {
+      margin-left:1em;
+  }
+  
+  th,td {
+      line-height:1.125em;
+      text-align:left;
+      vertical-align:top;
+      border-top:1px solid #DDD;
+      border-left:1px solid #DDD;
+      padding:.5em;
+  }
+  
+  th {
+      font-weight:700;
+      text-align:center;
+      color:#20639b;
+  }
+  
+  table thead:first-child tr:first-child th,table tbody:first-child tr:first-child th,table tbody:first-child tr:first-child td {
+      border-top:0;
+  }
+  
+  table thead:first-child tr:first-child th:first-child,table tbody:first-child tr:first-child td:first-child {
+      -webkit-border-radius:4px 0 0 0;
+      -moz-border-radius:4px 0 0;
+      border-radius:4px 0 0 0;
+  }
+  
+  table thead:first-child tr:first-child th:last-child,table tbody:first-child tr:first-child td:last-child {
+      -webkit-border-radius:0 4px 0 0;
+      -moz-border-radius:0 4px 0 0;
+      border-radius:0 4px 0 0;
+  }
+  
+  table thead:last-child tr:last-child th:first-child,table tbody:last-child tr:last-child td:first-child {
+      -webkit-border-radius:0 0 0 4px;
+      -moz-border-radius:0 0 0 4px;
+      border-radius:0 0 0 4px;
+  }
+  
+  table thead:last-child tr:last-child th:last-child,table tbody:last-child tr:last-child td:last-child {
+      -webkit-border-radius:0 0 4px 0;
+      -moz-border-radius:0 0 4px;
+      border-radius:0 0 4px 0;
+  }
+  
+  table tbody tr:nth-child(odd) td,table tbody tr:nth-child(odd) th {
+      background-color:#f9f9f9;
+  }
+  
+  caption {
+      margin-bottom:.5em;
+      text-align:center;
+  }
+  
+  p,fieldset,table,pre {
+      margin-top:.5em;
+      margin-bottom:.5em;
+  }
+  
+  body {
+      font:16px/1.4 "Helvetica Neue", Helvetica, "Open Sans", Arial, sans-serif;
+      color:#333;
+      /*max-width:960px;*/
+      /*margin:0 auto;*/
+      margin:1em;
+  }
+  
+  pre,code,kbd,samp,tt {
+      font-family:monospace;
+      font-size:90%;
+      line-height:100%;
+  }
+  
+  h1 {
+      font-size:200%;
+      border-bottom:2px dotted #ddd;
+  }
+  
+  a,a:visited,code {
+      /*color:#f06024;*/
+      color:#20639b;
+  }
+  
+  a:link {text-decoration:none;}    /* unvisited link */
+  a:visited {text-decoration:none;} /* visited link */
+  a:hover {text-decoration:underline;}   /* mouse over link */
+  a:active {text-decoration:underline;}  /* selected link */
+  
+  
+  h2 {
+      font-size:160%;
+  }
+  
+  h3 {
+      font-size:120%;
+  }
+  
+  h4 {
+      font-size:110%;
+  }
+  
+  h5 {
+      font-size:95%;
+  }
+  
+  h6 {
+      font-size:90%;
+      color:#999;
+  }
+  
+  dl {
+      margin:0 0 1.125em;
+  }
+  
+  dt {
+      font-weight:700;
+      line-height:1.125em;
+  }
+  
+  dd {
+      margin-left:1em;
+      line-height:1.125em;
+  }
+  
+  pre,blockquote {
+      border:1px solid #ddd;
+      background-color:#f1f1f1;
+      -webkit-border-radius:6px;
+      -moz-border-radius:6px;
+      border-radius:6px;
+      padding:10px;
+  }
+  
+  blockquote {
+      margin:1em 2.5em;
+  }
+  
+  code {
+      color:#20639b;
+      background:#f1f1f1;
+      line-height:1.5em;
+  }
+  
+  img {
+      max-width:100%;
+  }
+  
+  ol[type=1] {
+      list-style-type:decimal;
+  }
+  
+  ol[type=a] {
+      list-style-type:lower-alpha;
+  }
+  
+  ol[type=A] {
+      list-style-type:upper-alpha;
+  }
+  
+  ol[type=I] {
+      list-style-type:upper-roman;
+  }
+  
+  ol[type=i] {
+      list-style-type:lower-roman;
+  }
+  
+  
+  
+  h1.title {
+          font-size: 200%;
+          font-weight: bold;
+          padding-top: 0.2em;
+          /*padding-bottom: 0.2em;*/
+          text-align: center;
+          border: none;
+  }
+  
+  h2.author {
+          font-size: 100%;
+          text-align: center;
+          border: none;
+  }
+  
+  h3.date {
+          font-size: 75%;
+          text-align: center;
+          border: none;
+          font-style:italic;
+          font-weight: bold;
+  }
+  
+  /* animated spoiler CSS by Bloggersentral.com */
+  .spoilerbutton {
+  	display:block;
+  	margin:5px 0;
+  	padding: 3px 6px;
+  	color: #20639b;
+  	font-size: small;
+  	font-weight: bold;
+  }
+  .spoiler {overflow:hidden;background: #f5f5f5;}
+  .spoiler > div {-webkit-transition: all 0.2s ease;-moz-transition: margin 0.2s ease;-o-transition: all 0.2s ease;transition: margin 0.2s ease;}
+  .spoilerbutton[value="Show answer"] + .spoiler > div {margin-top:-100%;}
+  .spoilerbutton[value="Hide answer"] + .spoiler {padding:5px;} 
+  /**********************************************/
+  
+  </style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">NGS data analysis tutorial: <br> Alignment</h1>
+<h2 class="author"><a href="http://www.uv.es/bioinfor/">Estudios in silico en Biomedicina</a> <br> <em>Máster en Bioinformática, Universidad de Valencia</em></h2>
+<h3 class="date"><a href="http://www.dmontaner.com">David Montaner</a> <br> <em>2014-10-21</em></h3>
+</div>
+<hr>
+<div id="TOC">
+<ul>
+<li><a href="#preliminaries">Preliminaries</a><ul>
+<li><a href="#software-used-in-this-practical">Software used in this practical:</a></li>
+<li><a href="#file-formats-explored-in-this-practical">File formats explored in this practical:</a></li>
+<li><a href="#data-used-in-this-practical">Data used in this practical:</a></li>
+</ul></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#exercise">Exercise</a><ul>
+<li><a href="#exploring-the-reference-genome">Exploring the reference genome</a></li>
+<li><a href="#exploring-the-read-files">Exploring the read files</a></li>
+<li><a href="#indexing-the-reference-genome">Indexing the reference genome</a></li>
+<li><a href="#single-end-reads-alignment">Single end Reads Alignment</a></li>
+<li><a href="#paired-end-reads-alignment">Paired end Reads Alignment</a></li>
+</ul></li>
+</ul>
+</div>
+<hr>
+<!-- Common URLs: Tools -->
+<!-- Common URLs: File Formats -->
+<!-- External URLs -->
+<h1 id="preliminaries">Preliminaries</h1>
+<h2 id="software-used-in-this-practical">Software used in this practical:</h2>
+<ul>
+<li><a href="http://bio-bwa.sourceforge.net/" title="Burrows-Wheeler Aligner">BWA</a> : Burrows-Wheeler Aligner. A software package for mapping low-divergent sequences against a large reference genomes.</li>
+</ul>
+<h2 id="file-formats-explored-in-this-practical">File formats explored in this practical:</h2>
+<ul>
+<li><a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> : Sequence Alignment/Map format. A TAB-delimited text format storing the alignment information. A <em>header section</em> is optional.<br /> Mandatory fields are:
+<ol style="list-style-type: decimal">
+<li>QNAME: read name</li>
+<li>FLAG: bitwise FLAG</li>
+<li>RNAME: reference sequence name (chromosome)</li>
+<li>POS: 1-based leftmost mapping position (where the read starts mapping)</li>
+<li>MAPQ: mapping quality</li>
+<li>CIGAR: CIGAR string</li>
+<li>RNEXT: name of the mate/next read (for paired ends)</li>
+<li>PNEXT: Position of the mate/next read (BP O )</li>
+<li>TLEN: observed Template LENgth</li>
+<li>SEQ: read sequence</li>
+<li>QUAL: read quality (phred-scale +33)</li>
+</ol></li>
+</ul>
+<h2 id="data-used-in-this-practical">Data used in this practical:</h2>
+<ul>
+<li><strong>f000_chr21_ref_genome_sequence.fa</strong>: reference genome. For the practical we will just use the 21 human chromosome.</li>
+<li>s010_reads.fastq: reads form a <em>single end</em> experiment (simulated form chr21)</li>
+<li>p010_reads1.fastq, p010_reads2.fastq: reads from a <em>paired end</em> experiment (simulated form chr21)</li>
+</ul>
+<h1 id="overview">Overview</h1>
+<ol style="list-style-type: decimal">
+<li>Index the reference genome using <code>bwa index</code></li>
+<li>Map the <em>single end</em> reads and explore the output <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file.</li>
+<li>Map the <em>paired ends</em> reads and explore the output <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file.</li>
+</ol>
+<h1 id="exercise">Exercise</h1>
+<p>Create an empty directory to work in the exercise and copy or download the raw data to it:</p>
+<pre><code>cd data</code></pre>
+<!-- data_test directory to run my examples
+    cd .. 
+    rm -r data_test
+    mkdir data_test
+    cp data/*fa data_test
+    cp data/*fastq data_test
+    cd data_test
+-->
+<h2 id="exploring-the-reference-genome">Exploring the reference genome</h2>
+<p>Explore our reference genome file: <code>f000_chr21_ref_genome_sequence.fa</code></p>
+<ul>
+<li><p>How many chromosomes are there?</p>
+<p>grep “^&gt;” f000_chr21_ref_genome_sequence.fa</p></li>
+<li><p>How long is the sequence in base pairs?</p></li>
+</ul>
+<p>You can find this out just by counting the number of letters in the sequence. You can use the shell command <code>wc</code> to achieve that … but bear in mind that <code>wc -m</code> will include in the count the <strong>newline</strong> characters; you will have to subtract the number of lines to the number of characters.</p>
+<pre><code>grep -v &quot;^&gt;&quot; f000_chr21_ref_genome_sequence.fa | wc -l -m</code></pre>
+<ul>
+<li>What does the option <code>-v</code> does in the command above?</li>
+</ul>
+<!-- 
+48932060 - 802165 = 48129895
+-->
+<h2 id="exploring-the-read-files">Exploring the read files</h2>
+<ul>
+<li>How many reads do we have in our experiment?</li>
+</ul>
+<p>You can count the number of reads in the files …</p>
+<pre><code>wc -l *fastq</code></pre>
+<p>and divide by four. Why?</p>
+<ul>
+<li>Do the names of the paired end files match?</li>
+</ul>
+<p><em>Grep</em> the ids and compare the two files:</p>
+<pre><code>grep &quot;^@&quot; p010_reads1.fastq
+grep &quot;^@&quot; p010_reads2.fastq </code></pre>
+<h2 id="indexing-the-reference-genome">Indexing the reference genome</h2>
+<p>The first step when using <a href="http://bio-bwa.sourceforge.net/" title="Burrows-Wheeler Aligner">BWA</a> is to <em>index</em> the our reference:</p>
+<pre><code>bwa index -a bwtsw f000_chr21_ref_genome_sequence.fa </code></pre>
+<p>This step will take around one minute.</p>
+<ul>
+<li>What does it mean the option <code>-a bwtsw</code>? (Find out the help of the command by typing <code>bwa index</code> in the shell)</li>
+</ul>
+<!--
+Warning:
+`-a bwtsw' does not work for short genomes, while `-a is' and
+`-a div' do not work not for long genomes. Please choose `-a' according to the length of the genome.
+-->
+<ul>
+<li>How many new files have been crated in the working directory?</li>
+<li>How are they called?</li>
+<li>What are they?</li>
+</ul>
+<h2 id="single-end-reads-alignment">Single end Reads Alignment</h2>
+<p>Once the index has been created, the alignment of single end reads is done in <strong>two steps</strong> using <a href="http://bio-bwa.sourceforge.net/" title="Burrows-Wheeler Aligner">BWA</a>.</p>
+<p>First we use the <code>aln</code> option to create an <em>intermediate</em> file with the extension <strong>sai</strong>:</p>
+<pre><code>bwa aln -f s020_reads.sai f000_chr21_ref_genome_sequence.fa s010_reads.fastq </code></pre>
+<ul>
+<li>What is the option <code>-f</code> intended for?</li>
+<li>What happens if you do not set it?</li>
+</ul>
+<p>Then we can finish our mapping and get a <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file using the option <code>samse</code> (see indicates single ends).</p>
+<pre><code>bwa samse -f s030_reads.sam -r &quot;@RG\tID:sample1&quot; f000_chr21_ref_genome_sequence.fa s020_reads.sai s010_reads.fastq </code></pre>
+<ul>
+<li>What is the <code>-r</code> parameter? (revise the <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> specification)</li>
+<li>What happens if you do not include it?</li>
+<li>What happens if you do not format properly this line? … type for instance <code>-r &quot;sample1&quot;</code></li>
+</ul>
+<p>Explore the header of the created <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file:</p>
+<pre><code>head s030_reads.sam</code></pre>
+<!-- 
+@SQ SN:21   LN:48129895
+@RG ID:sample1
+@PG ID:bwa  PN:bwa  VN:0.7.10-r789  CL:bwa samse -f s030_reads.sam -r @RG\tID:sample1 f000_chr21_ref_genome_sequence.fa s020_reads.sai s010_reads.fastq
+-->
+<!-- 
+@SQ : "Reference sequence dictionary"
+@RG : "Read group"
+@PG : "Program" that did the alignment
+-->
+<ul>
+<li>Which information is in the <code>@SQ</code> line?</li>
+<li>What does the <code>LN</code> information math our estimated length of the 21 chromosome?</li>
+<li>How many <code>@SQ</code> lines would we have if we had more than one chromosome? Create a fake reference with more chromosomes and repeat the mapping in order to explore this.</li>
+<li>Has the <em>Read group</em> line (<code>@RG</code>) the information you did include?</li>
+<li>Can yo find out the specifications of the program which did create the alignment?</li>
+</ul>
+<p>Explore the alignment section of the file.</p>
+<h2 id="paired-end-reads-alignment">Paired end Reads Alignment</h2>
+<p>The alignment of paired ends files is done in <strong>two steps</strong> with <a href="http://bio-bwa.sourceforge.net/" title="Burrows-Wheeler Aligner">BWA</a>.</p>
+<p>As before we use the <code>aln</code> option. This step is done separately with each of the fastq files:</p>
+<pre><code>bwa aln -f p020_reads1.sai f000_chr21_ref_genome_sequence.fa p010_reads1.fastq
+bwa aln -f p020_reads2.sai f000_chr21_ref_genome_sequence.fa p010_reads2.fastq </code></pre>
+<p>In the paired end case we will use the option <code>sampe</code> to combine the two <strong>sai</strong> files into a unique <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file:</p>
+<pre><code>bwa sampe -f p030_reads.sam -r &quot;@RG\tID:sample1&quot; f000_chr21_ref_genome_sequence.fa p020_reads1.sai p020_reads2.sai p010_reads1.fastq p010_reads2.fastq </code></pre>
+<p>Explore the output <a href="http://samtools.github.io/hts-specs/SAMv1.pdf" title="http://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> file.</p>
+</body>
+</html>
